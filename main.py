@@ -1,10 +1,12 @@
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/',methods=['GET', 'POST'])
 def knock_knock():
     res = 'hello'
+    if request.method == 'POST':
+        res = 'hi'
     return res
 
 
