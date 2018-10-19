@@ -1,12 +1,54 @@
-from flask import Flask, request
+from flask import Flask, request, json, jsonify
+from flask_httpauth import HTTPBasicAuth
+from datetime import datetime, timezone, timedelta
+from google.cloud import datastore
+
+# config
+config = json.load(open('config.json', 'r'))
+url = config["url"]
+users = config["users"]
+JST = timezone(timedelta(hours=+9), 'JST')
+
+# auth
+auth = HTTPBasicAuth()
+@auth.get_password
+def get_pw(username):
+    if username in users:
+        return users.get(username)
+    return None
+
+# Datastore
+datastore_client = datastore.Client()
+kind='rbl_data'
+name='latest_call'
+key = datastore_client.key(kind, name)
+entity = datastore.Entity(key)
+
+def update_latest_call(dt):
+    entity = datastore.Entity(key)
+    entity.update({
+        'timestamp': dt
+    })
+    datastore_client.put(entity)
+
+def get_latest_call_time():
+    latest_call = datastore_client.get(key)
+    timestamp = latest_call['timestamp']
+    return timestamp
+
 
 app = Flask(__name__)
-
-@app.route('/',methods=['GET', 'POST'])
-def knock_knock():
-    res = 'hello'
+@app.route('/latest', methods=['GET', 'POST'])
+@auth.login_required
+def callcenter():
+    if request.method == 'GET':
+        res = jsonify({
+            'latest_call_time': get_latest_call_time()
+            })
     if request.method == 'POST':
-        res = 'hi'
+        now = datetime.now(JST)
+        update_latest_call(now)
+        res = 'alert accepted.'
     return res
 
 
