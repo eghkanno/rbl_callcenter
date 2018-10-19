@@ -5,7 +5,7 @@ from google.cloud import datastore
 
 # config
 config = json.load(open('config.json', 'r'))
-url = config["url"]
+path = config["path"]
 users = config["users"]
 JST = timezone(timedelta(hours=+9), 'JST')
 
@@ -38,7 +38,7 @@ def get_latest_call_time():
 
 
 app = Flask(__name__)
-@app.route('/latest', methods=['GET', 'POST'])
+@app.route(path, methods=['GET', 'POST'])
 @auth.login_required
 def callcenter():
     if request.method == 'GET':
