@@ -36,6 +36,11 @@ def get_latest_call_time():
     timestamp = latest_call['timestamp']
     return timestamp
 
+# run if no entity hes been created yet
+latest_call = datastore_client.get(key)
+if latest_call == None:
+    now = datetime.now(JST)
+    update_latest_call(now)
 
 app = Flask(__name__)
 @app.route(path, methods=['GET', 'POST'])
