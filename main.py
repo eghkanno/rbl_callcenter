@@ -8,6 +8,7 @@ config = json.load(open('config.json', 'r'))
 path = config["path"]
 users = config["users"]
 JST = timezone(timedelta(hours=+9), 'JST')
+dt_format = '%Y-%m-%d %H:%M:%S'
 
 # auth
 auth = HTTPBasicAuth()
@@ -39,7 +40,7 @@ def get_latest_call_time():
         timestamp = now
     else:
         timestamp = latest_call['timestamp']
-    return timestamp
+    return timestamp.astimezone(JST)
 
 app = Flask(__name__)
 @app.route(path, methods=['GET', 'POST'])
@@ -47,7 +48,7 @@ app = Flask(__name__)
 def callcenter():
     if request.method == 'GET':
         res = jsonify({
-            'latest_call_time': get_latest_call_time()
+            'datetime': get_latest_call_time().strftime(dt_format)
             })
     if request.method == 'POST':
         now = datetime.now(JST)
@@ -59,7 +60,7 @@ def callcenter():
 @auth.login_required
 def now():
     res = jsonify({
-        'now_time': datetime.now(JST) 
+        'datetime': datetime.now(JST).strftime(dt_format) 
         })
     return res
 
