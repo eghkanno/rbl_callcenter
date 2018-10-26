@@ -33,14 +33,13 @@ def update_latest_call(dt):
 
 def get_latest_call_time():
     latest_call = datastore_client.get(key)
-    timestamp = latest_call['timestamp']
+    if latest_call == None:
+        now = datetime.now(JST)
+        update_latest_call(now)
+        timestamp = now
+    else:
+        timestamp = latest_call['timestamp']
     return timestamp
-
-# run if no entity hes been created yet
-latest_call = datastore_client.get(key)
-if latest_call == None:
-    now = datetime.now(JST)
-    update_latest_call(now)
 
 app = Flask(__name__)
 @app.route(path, methods=['GET', 'POST'])
@@ -58,7 +57,7 @@ def callcenter():
 
 @app.route(path+"now/" )
 @auth.login_required
-def nowtime():
+def now():
     res = jsonify({
         'now_time': datetime.now(JST) 
         })
