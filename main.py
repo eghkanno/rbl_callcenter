@@ -56,6 +56,13 @@ def callcenter():
         res = 'alert accepted.'
     return res
 
+@app.route(path+"now/" )
+@auth.login_required
+def nowtime():
+    res = jsonify({
+        'now_time': datetime.now(JST) 
+        })
+    return res
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
